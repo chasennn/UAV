@@ -5,9 +5,9 @@ import json
 
 class UserController(object):
 
-    #Max value
-    MAX_TRIG_VAL = 256.0
-    MAX_JOY_VAL = 32768.0
+    #Max values
+    #MAX TRIGGER VALUE = 256.0
+    #MAX JOYSTICK VALUE = 32768.0
 
 
     def __init__(self):
@@ -38,36 +38,42 @@ class UserController(object):
 
 
 
-    #Input values are normalized between -1 and 1 for joysticks.
-    #Input values are normalized between 0 and 1 for triggers
+
     def inputListener(self):
          while True:
             events = get_gamepad()
             for event in events:
                 if event.code == self.aileronCont:
-                    if aileronsType == 1:
-                        self.ailerons = event.state / UserController.MAX_TRIG_VAL
-                    else:
-                        self.aileron = event.state / UserController.MAX_JOY_VAL
+                    self.ailerons = event.state
                 elif event.code == self.rudderCont:
-                    if rudderType == 1:
-                        self.rudder = event.state / UserController.MAX_TRIG_VAL
-                    else:
-                        self.rudder = event.state / UserController.MAX_JOY_VAL
+                    self.rudder = event.state 
                 elif event.code == self.elevatorCont:
-                    if elevatorType == 1:
-                        self.elevator = event.state / UserController.MAX_TRIG_VAL
-                    else:
-                        self.elevator = event.state / UserController.MAX_JOY_VAL
+                    self.elevator = event.state 
                 elif event.code == self.throttleCont:
-                    if throttleType == 1:
-                        self.throttle = event.state / UserController.MAX_TRIG_VAL
-                    else:
-                        self.throttle = event.state / UserController.MAX_JOY_VAL
+                    self.throttle = event.state 
+
+    #Trigger and joystick values normalized between 0 - 100
+
+    def getInput(self, value, type):
+        if type == 0:
+            return round(pow(3.05,-3) * (value) - pow(-3.64,-14))
+        else:
+            return round(0.391 * (value) - pow(3.64,-14))
+
+    def getAileronValue(self):
+        return getInput(ailerons, aileronsType)
+    def getRudderValue(self):
+        return getInput(rudder, rudderType)
+    def getElevatorValue(self):
+        return getInput(elevator, elevatorType)
+    def getThrottleValue(self):
+        return getInput(throttle, getThrottleValue)
+
+
                 
 
 
-if __name__ == '__main__':
+""" if __name__ == '__main__':
     while(1):
         inputType = input("Is this a Stick or a Trigger? [s/t]: ")
         if(inputType == "t"):
@@ -88,7 +94,7 @@ if __name__ == '__main__':
                 aileronCont = stickName
 
                 break
-        
+         """
 
 
 
