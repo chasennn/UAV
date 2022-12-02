@@ -90,6 +90,42 @@ class UserController(object):
         return self.getInput(self.throttle, self.throttleType)
 
 
+def userQuery(controlName, controlType, controlCode, data):
+    # Ailerons
+    while (1):
+        msg = "{" + controlName + "} Is this a Stick or a Trigger? [s/t]: "
+        inputType = input(msg)
+        if (inputType == "t"):
+            inputType = input(
+                "You selected Trigger. Is this correct? [y/n]: ")
+            if (inputType == "y"):
+                print("Selected Trigger")
+                data[controlType] = 1
+                deadzone = 100
+                break
+        elif (inputType == "s"):
+            inputType = input(
+                "You selected Stick. Is this correct? [y/n]: ")
+            if (inputType == "y"):
+                print("Selected Stick")
+                data[controlType] = 0
+                deadzone = 16384
+                break
+
+    print("\nMove the ", controlName, " controls: ")
+    while (1):
+        control = get_gamepad()
+        event = control[0]
+        if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
+            if (event.state >= deadzone):
+                print("\nIs this the correct input: ", event.code,)
+                userInput = input("Please type [y/n]: ")
+                if (userInput == "y"):
+                    data[controlCode] = event.code
+                    break
+                print("\nMove the ", controlName, " controls: ")
+
+
 if __name__ == '__main__':
 
     deadzone = 0
@@ -107,139 +143,16 @@ if __name__ == '__main__':
 
     while (1):
         # Ailerons
-        while (1):
-            inputType = input(
-                "{Ailerons} Is this a Stick or a Trigger? [s/t]: ")
-            if (inputType == "t"):
-                inputType = input(
-                    "You selected Trigger. Is this correct? [y/n]: ")
-                if (inputType == "y"):
-                    print("Selected Trigger")
-                    data["aileronType"] = 1
-                    deadzone = 100
-                    break
-            elif (inputType == "s"):
-                inputType = input(
-                    "You selected Stick. Is this correct? [y/n]: ")
-                if (inputType == "y"):
-                    print("Selected Stick")
-                    data["aileronType"] = 0
-                    deadzone = 16384
-                    break
-
-        print("\nMove the aileron controls: ")
-        while (1):
-            control = get_gamepad()
-            event = control[0]
-            if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
-                if (event.state >= deadzone):
-                    print("\nIs this the correct input: ", event.code,)
-                    userInput = input("Please type [y/n]: ")
-                    if (userInput == "y"):
-                        data["aileronCont"] = event.code
-                        break
-                    print("\nMove the aileron controls: ")
+        userQuery("Ailerons", "aileronType", "aileronCont", data)
 
         # Rudder
-        while (1):
-            inputType = input("{Rudder} Is this a Stick or a Trigger? [s/t]: ")
-            if (inputType == "t"):
-                inputType = input(
-                    "You selected Trigger. Is this correct? [y/n]: ")
-                if (inputType == "y"):
-                    print("Selected Trigger")
-                    data["rudderType"] = 1
-                    deadzone = 100
-                    break
-            elif (inputType == "s"):
-                inputType = input(
-                    "You selected Stick. Is this correct? [y/n]: ")
-                if (inputType == "y"):
-                    print("Selected Stick")
-                    data["rudderType"] = 0
-                    deadzone = 16384
-                    break
-
-        print("\nMove the Rudder controls: ")
-        while (1):
-            control = get_gamepad()
-            event = control[0]
-            if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
-                if (event.state >= deadzone):
-                    print("\nIs this the correct input: ", event.code,)
-                    userInput = input("Please type [y/n]: ")
-                    if (userInput == "y"):
-                        data["rudderCont"] = event.code
-                        break
-                    print("\nMove the Rudder controls: ")
+        userQuery("Rudder", "rudderType", "rudderCont", data)
 
         # elevator
-        while (1):
-            inputType = input(
-                "{Elevator} Is this a Stick or a Trigger? [s/t]: ")
-            if (inputType == "t"):
-                inputType = input(
-                    "You selected Trigger. Is this correct? [y/n]: ")
-                if (inputType == "y"):
-                    print("Selected Trigger")
-                    data["elevatorType"] = 1
-                    deadzone = 100
-                    break
-            elif (inputType == "s"):
-                inputType = input(
-                    "You selected Stick. Is this correct? [y/n]: ")
-                if (inputType == "y"):
-                    print("Selected Stick")
-                    data["elevatorType"] = 0
-                    deadzone = 16384
-                    break
-
-        print("\nMove the elevator controls: ")
-        while (1):
-            control = get_gamepad()
-            event = control[0]
-            if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
-                if (event.state >= deadzone):
-                    print("\nIs this the correct input: ", event.code,)
-                    userInput = input("Please type [y/n]: ")
-                    if (userInput == "y"):
-                        data["elevatorCont"] = event.code
-                        break
-                    print("\nMove the elevator controls: ")
+        userQuery("Elevator", "elevatorType", "elevatorCont", data)
 
         # Throttle
-        while (1):
-            inputType = input(
-                "{Throttle} Is this a Stick or a Trigger? [s/t]: ")
-            if (inputType == "t"):
-                inputType = input(
-                    "You selected Trigger. Is this correct? [y/n]: ")
-                if (inputType == "y"):
-                    print("Selected Trigger")
-                    data["throttleType"] = 1
-                    deadzone = 100
-                    break
-            elif (inputType == "s"):
-                inputType = input(
-                    "You selected Stick. Is this correct? [y/n]: ")
-                if (inputType == "y"):
-                    print("Selected Stick")
-                    data["throttleType"] = 0
-                    deadzone = 16384
-                    break
-
-        print("\nMove the throttle controls: ")
-        while (1):
-            control = get_gamepad()
-            event = control[0]
-            if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
-                if (event.state >= deadzone):
-                    print("\nIs this the correct input: ", event.code,)
-                    userInput = input("Please type [y/n]: ")
-                    if (userInput == "y"):
-                        data["throttleCont"] = event.code
-                        break
-                    print("\nMove the throttle controls: ")
+        userQuery("Throttle", "throttleType", "throttleCont", data)
 
         print("Double check the following controls. Note that for control type, 0 is joystick and 1 is a trigger\n")
         print(data)
