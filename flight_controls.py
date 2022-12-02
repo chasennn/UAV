@@ -31,6 +31,8 @@ class UserController(object):
         self.elevatorCont = ""
         self.throttleCont = ""
 
+        self.openConfig()
+
         self.controlsThread = threading.Thread(target=self.inputListener, args=())
         self.controlsThread.daemon = True
         self.controlsThread.start()
@@ -39,9 +41,21 @@ class UserController(object):
         
 
     def openConfig(self):
-        configFile = open('Controls_Configuration.json')
-        data = json.load(configFile)
 
+        with open('Controls_Configuration.json', 'r') as outfile:
+            data = json.load(outfile)
+
+        self.aileronCont = data["aileronCont"]
+        self.rudderCont = data["rudderCont"]
+        self.elevatorCont = data["elevatorCont"]
+        self.throttleCont = data["throttleCont"]
+
+        self.aileronsType = data["aileronType"]
+        self.rudderType = data["rudderType"]
+        self.elevatorType = data["elevatorType"]
+        self.throttleType = data["throttleType"]
+
+        print("Control configuration loaded successfully")
 
 
     def inputListener(self):
@@ -61,9 +75,9 @@ class UserController(object):
 
     def getInput(self, value, type):
         if type == 0: #joystick
-            return round(pow(3.05,-3) * (value) - pow(-3.64,-14))
+            return round(1.53 * pow(10,-3) * (value) - 3.18 * pow(10, -14))
         else:         #trigger
-            return round(0.391 * (value) - pow(3.64,-14))
+            return round(0.391 * (value) - 3.64 * pow(10,-14))
 
     def getAileronValue(self):
         return self.getInput(self.ailerons, self.aileronsType)
@@ -72,7 +86,7 @@ class UserController(object):
     def getElevatorValue(self):
         return self.getInput(self.elevator, self.elevatorType)
     def getThrottleValue(self):
-        return self.getInput(self.throttle, self.getThrottleValue)
+        return self.getInput(self.throttle, self.throttleType)
 
 
                 
