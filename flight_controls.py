@@ -5,12 +5,12 @@ import json
 import io
 import os
 
+
 class UserController(object):
 
-    #Max values
-    #MAX TRIGGER VALUE = 256.0
-    #MAX JOYSTICK VALUE = 32768.0
-
+    # Max values
+    # MAX TRIGGER VALUE = 256.0
+    # MAX JOYSTICK VALUE = 32768.0
 
     def __init__(self):
         #Note: 2-98
@@ -25,7 +25,7 @@ class UserController(object):
         self.elevatorType = 0
         self.throttleType = 0
 
-        #Controls
+        # Controls
         self.aileronCont = ""
         self.rudderCont = ""
         self.elevatorCont = ""
@@ -33,12 +33,11 @@ class UserController(object):
 
         self.openConfig()
 
-        self.controlsThread = threading.Thread(target=self.inputListener, args=())
+        self.controlsThread = threading.Thread(
+            target=self.inputListener, args=())
         self.controlsThread.daemon = True
         self.controlsThread.start()
         print("Controls Configuration started Successfully\n")
-    
-        
 
     def openConfig(self):
 
@@ -57,47 +56,43 @@ class UserController(object):
 
         print("Control configuration loaded successfully")
 
-
     def inputListener(self):
-         while True:
+        while True:
             events = get_gamepad()
             for event in events:
                 if event.code == self.aileronCont:
                     self.ailerons = event.state
                 elif event.code == self.rudderCont:
-                    self.rudder = event.state 
+                    self.rudder = event.state
                 elif event.code == self.elevatorCont:
-                    self.elevator = event.state 
+                    self.elevator = event.state
                 elif event.code == self.throttleCont:
-                    self.throttle = event.state 
+                    self.throttle = event.state
 
-    #Trigger and joystick values normalized between 0 - 100
+    # Trigger and joystick values normalized between 0 - 100
 
     def getInput(self, value, type):
-        if type == 0: #joystick
-            return round(1.53 * pow(10,-3) * (value) + 50)
-        else:         #trigger
-            return round(0.391 * (value) - 3.64 * pow(10,-14))
+        if type == 0:  # joystick
+            return round(1.53 * pow(10, -3) * (value) + 50)
+        else:  # trigger
+            return round(0.391 * (value) - 3.64 * pow(10, -14))
 
     def getAileronValue(self):
         return self.getInput(self.ailerons, self.aileronsType)
+
     def getRudderValue(self):
         return self.getInput(self.rudder, self.rudderType)
+
     def getElevatorValue(self):
         return self.getInput(self.elevator, self.elevatorType)
+
     def getThrottleValue(self):
         return self.getInput(self.throttle, self.throttleType)
 
 
-                
-
-
 if __name__ == '__main__':
 
-
-
     deadzone = 0
-    
 
     data = {
         "aileronCont": "",
@@ -110,148 +105,149 @@ if __name__ == '__main__':
         "throttleType": 0
     }
 
-
-    while(1):
-        #Ailerons
-        while(1):
-            inputType = input("{Ailerons} Is this a Stick or a Trigger? [s/t]: ")
-            if(inputType == "t"):
-                inputType = input("You selected Trigger. Is this correct? [y/n]: ")
+    while (1):
+        # Ailerons
+        while (1):
+            inputType = input(
+                "{Ailerons} Is this a Stick or a Trigger? [s/t]: ")
+            if (inputType == "t"):
+                inputType = input(
+                    "You selected Trigger. Is this correct? [y/n]: ")
                 if (inputType == "y"):
                     print("Selected Trigger")
                     data["aileronType"] = 1
                     deadzone = 100
                     break
             elif (inputType == "s"):
-                inputType = input("You selected Stick. Is this correct? [y/n]: ")
+                inputType = input(
+                    "You selected Stick. Is this correct? [y/n]: ")
                 if (inputType == "y"):
                     print("Selected Stick")
                     data["aileronType"] = 0
                     deadzone = 16384
                     break
 
-        print("\nMove the aileron controls: ") 
-        while(1):
+        print("\nMove the aileron controls: ")
+        while (1):
             control = get_gamepad()
             event = control[0]
             if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
                 if (event.state >= deadzone):
                     print("\nIs this the correct input: ", event.code,)
                     userInput = input("Please type [y/n]: ")
-                    if(userInput == "y"):
+                    if (userInput == "y"):
                         data["aileronCont"] = event.code
                         break
                     print("\nMove the aileron controls: ")
 
-        #Rudder
-        while(1):
+        # Rudder
+        while (1):
             inputType = input("{Rudder} Is this a Stick or a Trigger? [s/t]: ")
-            if(inputType == "t"):
-                inputType = input("You selected Trigger. Is this correct? [y/n]: ")
+            if (inputType == "t"):
+                inputType = input(
+                    "You selected Trigger. Is this correct? [y/n]: ")
                 if (inputType == "y"):
                     print("Selected Trigger")
                     data["rudderType"] = 1
                     deadzone = 100
                     break
             elif (inputType == "s"):
-                inputType = input("You selected Stick. Is this correct? [y/n]: ")
+                inputType = input(
+                    "You selected Stick. Is this correct? [y/n]: ")
                 if (inputType == "y"):
                     print("Selected Stick")
                     data["rudderType"] = 0
                     deadzone = 16384
                     break
 
-        print("\nMove the Rudder controls: ") 
-        while(1):
+        print("\nMove the Rudder controls: ")
+        while (1):
             control = get_gamepad()
             event = control[0]
             if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
                 if (event.state >= deadzone):
                     print("\nIs this the correct input: ", event.code,)
                     userInput = input("Please type [y/n]: ")
-                    if(userInput == "y"):
+                    if (userInput == "y"):
                         data["rudderCont"] = event.code
                         break
                     print("\nMove the Rudder controls: ")
 
-        #elevator
-        while(1):
-            inputType = input("{Elevator} Is this a Stick or a Trigger? [s/t]: ")
-            if(inputType == "t"):
-                inputType = input("You selected Trigger. Is this correct? [y/n]: ")
+        # elevator
+        while (1):
+            inputType = input(
+                "{Elevator} Is this a Stick or a Trigger? [s/t]: ")
+            if (inputType == "t"):
+                inputType = input(
+                    "You selected Trigger. Is this correct? [y/n]: ")
                 if (inputType == "y"):
                     print("Selected Trigger")
                     data["elevatorType"] = 1
                     deadzone = 100
                     break
             elif (inputType == "s"):
-                inputType = input("You selected Stick. Is this correct? [y/n]: ")
+                inputType = input(
+                    "You selected Stick. Is this correct? [y/n]: ")
                 if (inputType == "y"):
                     print("Selected Stick")
                     data["elevatorType"] = 0
                     deadzone = 16384
                     break
 
-        print("\nMove the elevator controls: ") 
-        while(1):
+        print("\nMove the elevator controls: ")
+        while (1):
             control = get_gamepad()
             event = control[0]
             if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
                 if (event.state >= deadzone):
                     print("\nIs this the correct input: ", event.code,)
                     userInput = input("Please type [y/n]: ")
-                    if(userInput == "y"):
+                    if (userInput == "y"):
                         data["elevatorCont"] = event.code
                         break
                     print("\nMove the elevator controls: ")
 
-        #Throttle
-        while(1):
-            inputType = input("{Throttle} Is this a Stick or a Trigger? [s/t]: ")
-            if(inputType == "t"):
-                inputType = input("You selected Trigger. Is this correct? [y/n]: ")
+        # Throttle
+        while (1):
+            inputType = input(
+                "{Throttle} Is this a Stick or a Trigger? [s/t]: ")
+            if (inputType == "t"):
+                inputType = input(
+                    "You selected Trigger. Is this correct? [y/n]: ")
                 if (inputType == "y"):
                     print("Selected Trigger")
                     data["throttleType"] = 1
                     deadzone = 100
                     break
             elif (inputType == "s"):
-                inputType = input("You selected Stick. Is this correct? [y/n]: ")
+                inputType = input(
+                    "You selected Stick. Is this correct? [y/n]: ")
                 if (inputType == "y"):
                     print("Selected Stick")
-                    data["throttleType"]= 0
+                    data["throttleType"] = 0
                     deadzone = 16384
                     break
 
-        print("\nMove the throttle controls: ") 
-        while(1):
+        print("\nMove the throttle controls: ")
+        while (1):
             control = get_gamepad()
             event = control[0]
             if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
                 if (event.state >= deadzone):
                     print("\nIs this the correct input: ", event.code,)
                     userInput = input("Please type [y/n]: ")
-                    if(userInput == "y"):
+                    if (userInput == "y"):
                         data["throttleCont"] = event.code
                         break
                     print("\nMove the throttle controls: ")
-
-
 
         print("Double check the following controls. Note that for control type, 0 is joystick and 1 is a trigger\n")
         print(data)
         userInput = input("Type [y/n] to confirm the controls: ")
         if userInput == "y":
             break
-    
 
-    #writing to file
+    # writing to file
 
     with open('Controls_Configuration.json', 'w') as outfile:
         json.dump(data, outfile)
-
-
-
-
-
-
