@@ -75,7 +75,7 @@ class UserController(object):
 
     def getInput(self, value, type):
         if type == 0: #joystick
-            return round(1.53 * pow(10,-3) * (value) - 3.18 * pow(10, -14))
+            return round(1.53 * pow(10,-3) * (value) + 50)
         else:         #trigger
             return round(0.391 * (value) - 3.64 * pow(10,-14))
 
