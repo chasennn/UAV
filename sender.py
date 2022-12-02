@@ -7,6 +7,7 @@ import busio
 import digitalio
 import sys, tty, termios, time
 import curses
+import flight_controls
 
 screen = curses.initscr()
 screen.nodelay(True)
@@ -45,29 +46,43 @@ RudderDuty = 50
 
 MotorDuty = 50
 
-i = 0
-
-while i < 100:
+while True:
     
    
-    char = screen.getch()
+    """ char = screen.getch()
     
     if char == ord('w'):
         UpDuty = UpDuty - 6
-    elif char == ord('s'):
+    
+    if char == ord('s'):
         UpDuty = UpDuty + 6
-    elif char == ord('a'):
+    
+    if char == ord('a'):
         RightDuty = RightDuty - 6
-    elif char == ord('d'):
+    
+    if char == ord('d'):
         RightDuty = RightDuty + 6
-    elif char == ord('c'):
+        
+    if char == ord('c'):
         RudderDuty = RudderDuty + 6
-    elif char == ord('z'):
+        
+    if char == ord('z'):
         RudderDuty = RudderDuty -6
-    elif char == ord('k'):
+        
+    if char == ord('k'):
         MotorDuty = MotorDuty + 6
-    elif char == ord('m'):
-        MotorDuty = MotorDuty - 6
+        
+    if char == ord('m'):
+        MotorDuty = MotorDuty - 6 """
+
+    controller = flight_controls.UserController()
+    
+    RightDuty = object.getAileronValue()
+    RudderDuty = object.getRudderValue()
+    UpDuty = object.getElevatorValue()
+    MotorDuty = object.getThrottleValue()
+    
+    
         
     if (MotorDuty > 98):
         MotorDuty = 98
