@@ -10,7 +10,7 @@ class UserController(object):
 
     # Max values
     # MAX TRIGGER VALUE = 256.0
-    # MAX JOYSTICK VALUE = 32768.0
+    # MAX JOYSTICK VALUE = 1024 <- number for logitech extreme 3d pro
 
     def __init__(self):
         #Note: 2-98
@@ -73,7 +73,7 @@ class UserController(object):
 
     def getInput(self, value, type):
         if type == 0:  # joystick
-            return round(1.53 * pow(10, -3) * (value) + 50)
+            return round(0.0976 * (value) + 3.84 * pow(10,-3))
         else:  # trigger
             return round(0.391 * (value) - 3.64 * pow(10, -14))
 
@@ -109,14 +109,14 @@ def userQuery(controlName, controlType, controlCode, data):
             if (inputType == "y"):
                 print("Selected Stick")
                 data[controlType] = 0
-                deadzone = 16384
+                deadzone = 800
                 break
 
     print("\nMove the ", controlName, " controls: ")
     while (1):
         control = get_gamepad()
         event = control[0]
-        if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT"):
+        if (event.code != "SYN_REPORT" and event.code != "SYN_CONFIG" and event.code != "SYN_MT_REPORT" and event.code != "SYN_DROPPED" and event.code != "SYN_MAX" and event.code != "SYN_CNT" and event.code != "SYN_REPORT" and event.code != "MSC_SCAN"):
             if (event.state >= deadzone):
                 print("\nIs this the correct input: ", event.code,)
                 userInput = input("Please type [y/n]: ")
