@@ -1,93 +1,64 @@
-import time
+# UAV Summer/Fall 2022 Team
+# Ground Station Controls Code
+# Peter Hoang and Chasen Gaither
 
+# This code runs a basic transmitter connected to a raspberry pi.
+# The raspberry pi takes input from a joystick controller (Logitech Extreme 3D Pro)
+# and sends that data as integers to the receiver.
+
+"""
+CONTROLS NOTES (VERY IMPORTANT)
+
+run this code and fully cycle the throttle and joystick controls, then reset the throttle
+to its lowest setting. If this does not 
+"""
+
+# Imports: adafruit radio complex
 import adafruit_rfm9x
 import board
 import RPi.GPIO as GPIO
 import busio
 import digitalio
-import sys, tty, termios, time
-import curses
-import flight_controls
-
-screen = curses.initscr()
-screen.nodelay(True)
-curses.noecho()
-curses.cbreak()
-screen.keypad(True)
-
+import flight_controls # Found in AntTest folder, it is responsible for controls configuration
 GPIO.setwarnings(False)
 
-def getch():
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try: 
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
-
-
-RADIO_FREQ_MHZ = 925.0
+# Initialize radio
+RADIO_FREQ_MHZ = 915.0
 CS = digitalio.DigitalInOut(board.CE1)
 RESET = digitalio.DigitalInOut(board.D25)
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
-
-# Initialze RFM radio with a more conservative baudrate
 rfm9x = adafruit_rfm9x.RFM9x(spi, CS, RESET, RADIO_FREQ_MHZ)
+rfm9x.tx_power = 23 # maximum power
 
-rfm9x.tx_power = 23
+# Initial values for controls, ranged between 2 and 98
+# These run with pulse width modulation, so 2 is min and 98 is max positions
 
-UpDuty = 50
+UpDuty = 50         # Servo position for rear elevator
+RightDuty = 50      # Servo position for left and right ailerons
+RudderDuty = 50     # Servo position for rear rudder
 
-RightDuty = 50
+MotorDuty = 2       # runs just like a servo motor, but is a BLDC motor
+                    # 2 is lowest speed
 
-RudderDuty = 50
+# Initialize controller
+controller = flight_controls.UserController()
 
-MotorDuty = 50
+print("Adjust throttle to maximum value, then return it to minimum before starting the UAV.")
 
 while True:
     
-   
-    """ char = screen.getch()
-    
-    if char == ord('w'):
-        UpDuty = UpDuty - 6
-    
-    if char == ord('s'):
-        UpDuty = UpDuty + 6
-    
-    if char == ord('a'):
-        RightDuty = RightDuty - 6
-    
-    if char == ord('d'):
-        RightDuty = RightDuty + 6
-        
-    if char == ord('c'):
-        RudderDuty = RudderDuty + 6
-        
-    if char == ord('z'):
-        RudderDuty = RudderDuty -6
-        
-    if char == ord('k'):
-        MotorDuty = MotorDuty + 6
-        
-    if char == ord('m'):
-        MotorDuty = MotorDuty - 6 """
-
-    controller = flight_controls.UserController()
-    
+    # Access controller coordinates 
     RightDuty = controller.getAileronValue()
     RudderDuty = controller.getRudderValue()
     UpDuty = controller.getElevatorValue()
     MotorDuty = controller.getThrottleValue()
-    
-    
         
+    # bound each motor position between 2 and 98
     if (MotorDuty > 98):
         MotorDuty = 98
     elif (MotorDuty < 2):
         MotorDuty = 2
+    MotorDuty = 100 - MotorDuty
     
     if (UpDuty > 98):
         UpDuty = 98
@@ -103,27 +74,42 @@ while True:
         RudderDuty = 98
     elif (RudderDuty < 2):
         RudderDuty = 2
-        
-    if (UpDuty > 50):
-        UpDuty = UpDuty - 2
-    if (UpDuty < 50):
-        UpDuty = UpDuty + 2
-        
-    if (RightDuty > 50):
-        RightDuty = RightDuty - 2
-    if (RightDuty < 50):
-        RightDuty = RightDuty + 2
-        
-    if (RudderDuty > 50):
-        RudderDuty = RudderDuty - 2
-    if (RudderDuty < 50):
-        RudderDuty = RudderDuty + 2
  
-    
+    # Combine all values into an integer (easiest for us, but if you can configure it as a string go ahead)
     duty = int(MotorDuty * 1000000 + UpDuty * 10000 + RightDuty * 100 + RudderDuty)
     
+    # Convert to bytes and send through the radio
     packet = duty.to_bytes(32, byteorder = "big")
     rfm9x.send(packet)
+    
+    """
+    We recommend inserting code here to receive data from the plane.
+    The transceiver on the other side transmits exactly the same way as configured above.
+    Use the transceiver on the other side, coupled with I2C or SPI devices, to send data like:
+        GPS Coordinates
+        Altitude
+
+    Add a receive line like this:
+        
+        packet = rfm9x.receive()
+        packet_int = int.from_bytes(packet, byteorder = "big")
+        
+    And you should be able to manipulate the received data as you please.
+    
+    
+    
+    The transmitter sends data as an integer, formulated this way:
+    
+    Byte                        7 6             5 4             3 2             1 0
+    Associated Motor        Propulsion        Elevator        Ailerons        Rudder
+    
+    You can add more motor controls (camera gimbal, wheel steering, extra flaps, etc.) 
+    by creating a two-digit decimal number and putting it at bytes 8 and 9, but just make sure 
+    you change the code to handle everything as a string instead of as an integer. Integers are
+    capped at 10 places, but strings can be up to 32 characters.
+
+    Good Luck!
+    """
    
     
     
