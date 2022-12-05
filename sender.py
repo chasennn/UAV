@@ -77,10 +77,10 @@ while True:
 
     controller = flight_controls.UserController()
     
-    RightDuty = object.getAileronValue()
-    RudderDuty = object.getRudderValue()
-    UpDuty = object.getElevatorValue()
-    MotorDuty = object.getThrottleValue()
+    RightDuty = controller.getAileronValue()
+    RudderDuty = controller.getRudderValue()
+    UpDuty = controller.getElevatorValue()
+    MotorDuty = controller.getThrottleValue()
     
     
         
