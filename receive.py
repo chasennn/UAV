@@ -3,7 +3,7 @@ import board
 import busio
 import adafruit_rfm9x
 import RPi.GPIO as GPIO
-from time import time
+import time
 from gpiozero import Servo
 
 from gpiozero.pins.pigpio import PiGPIOFactory
@@ -28,11 +28,12 @@ Elevator = Servo(20, min_pulse_width = 0.5/1000, max_pulse_width = 2.5/1000, pin
 
 Rudder = Servo(21, min_pulse_width = 0.5/1000, max_pulse_width = 2.5/1000, pin_factory = factory)
 
+# initialize motor and set to min pulse width
 Motor = Servo(24, min_pulse_width = 1/1000, max_pulse_width = 2/1000, pin_factory = factory)
+Motor.value = -1
+time.sleep(2)
+# Don't remove sleep! motor won't be initialized 
 
-x = datetime.datetime.now()
-fileName = "test_" + str(x) + ".txt"
-file1 = open(fileName, 'w')
 
 droppedPackets = 0
 
