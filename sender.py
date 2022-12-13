@@ -43,8 +43,6 @@ MotorDuty = 2       # runs just like a servo motor, but is a BLDC motor
 # Initialize controller
 controller = flight_controls.UserController()
 
-print("Adjust throttle to maximum value, then return it to minimum before starting the UAV.")
-
 while True:
     
     # Access controller coordinates 
@@ -53,13 +51,14 @@ while True:
     UpDuty = controller.getElevatorValue()
     MotorDuty = controller.getThrottleValue()
         
-    # bound each motor position between 2 and 98
-    if (MotorDuty > 98):
-        MotorDuty = 98
-    elif (MotorDuty < 2):
-        MotorDuty = 2
-    MotorDuty = 100 - MotorDuty
-    
+    # bound each motor position between 0 and 100
+    if (MotorDuty > 100):
+        MotorDuty = 100
+    elif (MotorDuty < 0):
+        MotorDuty = 0
+    MotorDuty = 100-MotorDuty
+
+
     if (UpDuty > 98):
         UpDuty = 98
     elif (UpDuty < 2):
